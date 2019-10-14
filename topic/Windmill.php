@@ -4,8 +4,11 @@ class Windmill
 {
 
     const DIRECTION_LEFT = 1;
+
     const DIRECTION_DOWN = 2;
+
     const DIRECTION_RIGHT = 3;
+
     const DIRECTION_UP = 4;
 
     private $windmill = [];
@@ -16,13 +19,13 @@ class Windmill
 
     private $lastPoint;
 
-    private $total; 
+    private $total;
 
     private $n;
 
     /**
      * Windmill constructor.
-     * 
+     *
      * @param int $num
      * @throws Exception
      */
@@ -34,27 +37,62 @@ class Windmill
 
         $this->n = $num;
 
-        $total = $num * $num;
-        
-        $this->addValue($num, $this->getEnd());
+        $this->total = $num * $num;
 
-        $this->total = $total - 1;
+        $this->addValue($this->getEnd());
+
+        $this->initDirection();
     }
 
+    /**
+     * 获取风车
+     *
+     * @return array
+     */
     public function getWindmill()
     {
-        $total = $this->total;
+        while ($this->total > 0) {
 
-        while($total > 0) {
             $this->turn();
-            $loc = $this->getNextLoc(); 
-            $this->addValue($total, $loc);
-            $total--;
+
+            $loc = $this->getNextLoc();
+
+            $this->addValue($loc);
         }
+
+        $this->sortWindmill();
+
         return $this->windmill;
     }
 
-    private function addValue(int $num, array $loc)
+    /**
+     * 对风车进行排序
+     */
+    private function sortWindmill()
+    {
+        array_walk($this->windmill, 'ksort');
+
+        ksort($this->windmill);
+    }
+
+    /**
+     * 初始化方向
+     */
+    private function initDirection()
+    {
+        $direction = ($this->n % 2)
+            ? self::DIRECTION_LEFT
+            : self::DIRECTION_RIGHT;
+
+        $this->setDirection($direction);
+    }
+
+    /**
+     * 向风车中增加新的值
+     *
+     * @param array $loc
+     */
+    private function addValue(array $loc)
     {
         $x = $loc[0];
 
@@ -62,7 +100,9 @@ class Windmill
 
         $this->lastPoint = $loc;
 
-        $this->windmill[$x][$y] = $num;
+        $this->windmill[$y][$x] = $this->getTotal();
+
+        $this->decreaseTotal();
     }
 
     /**
@@ -70,17 +110,19 @@ class Windmill
      *
      * @return array
      */
-    private function getEnd()
+    private function getEnd():array
     {
         $n = $this->n;
 
         $loc = $n - 1;
 
         if ($n % 2) {
-            return [$loc, 0];
+            $end = [$loc, 0];
         } else {
-            return [0, $loc];
+            $end = [0, $loc];
         }
+
+        return $end;
     }
 
     /**
@@ -98,7 +140,7 @@ class Windmill
      *
      * @return int
      */
-    private function getDirection()
+    private function getDirection():int
     {
         return $this->direction;
     }
@@ -112,7 +154,12 @@ class Windmill
     {
         $nextLoc = $this->getNextLoc();
 
-        if ($nextLoc[0] > $this->boundary || $nextLoc[1] > $this->boundary) return true;
+        if (
+            $nextLoc[0] > $this->boundary
+            || $nextLoc[1] > $this->boundary
+            || $nextLoc[0] < 0
+            || $nextLoc[1] < 0
+        ) return true;
 
         //下一个坐标点是否已存在
         if ($this->hasLacExist($nextLoc)) return true;
@@ -130,7 +177,7 @@ class Windmill
 
         $y = $loc[1];
 
-        return (!empty($this->windmill[$x][$y]));
+        return (!empty($this->windmill[$y][$x]));
     }
 
     /**
@@ -175,8 +222,24 @@ class Windmill
 
         $this->setDirection($direction);
     }
+
+    /**
+     * @return int
+     */
+    private function getTotal():int
+    {
+        return $this->total;
+    }
+
+    /**
+     * 减少total
+     */
+    private function decreaseTotal()
+    {
+        $this->total--;
+    }
 }
 
+$windmill = new Windmill(1000);
 
-$windmill = new Windmill(5);
-print_r($windmill->getWindmill());
+var_dump($windmill->getWindmill());
