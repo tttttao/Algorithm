@@ -29,18 +29,22 @@ function mergeArr(array $arrA, array $arrB): array
     while (!empty($arrA) || !empty($arrB)) {
 
         if (empty($arrA) || empty($arrB)) {
-            $res = array_merge($res, $arrA, $arrB);
+
+            $res = array_merge($res, array_reverse($arrA), array_reverse($arrB));
+
             break;
         }
 
-        if ($arrA[0] > $arrB[0]) {
-            $val = array_shift($arrB);
+        if (end($arrA) > end($arrB)) {
+            $val = array_pop($arrA);
         } else {
-            $val = array_shift($arrA);
+            $val = array_pop($arrB);
         }
 
         array_push($res, $val);
     }
+
+    $res = array_reverse($res);
 
     return $res;
 }

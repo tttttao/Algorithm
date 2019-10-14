@@ -25,6 +25,6 @@ function select(array $arr): array
     return $arr;
 }
 
-$res = select(getArr(100));
+$res = select(getArr(100000));
 
 dd($res);
